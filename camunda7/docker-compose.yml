@@ -1,0 +1,34 @@
+version: '2.4'
+
+services:
+
+    camunda-mysql:
+        image: camunda/camunda-bpm-platform:tomcat-latest
+        environment:
+            - DB_DRIVER=com.mysql.cj.jdbc.Driver
+            - DB_URL=jdbc:mysql://mysql:3306/process-engine?sendFractionalSeconds=false
+            - DB_USERNAME=camunda
+            - DB_PASSWORD=camunda
+            - WAIT_FOR=mysql:3306
+        links:
+            - mysql
+        ports:
+            - "8090:8080"
+        restart: unless-stopped
+        extra_hosts:
+        - "host.docker.internal:host-gateway"
+        volumes:
+            - ./process/target/loan-approval-0.1.0-SNAPSHOT:/camunda/webapps/loan-approval
+
+    mysql:
+        image: mysql:8.0
+        environment:
+            - MYSQL_ROOT_PASSWORD=camunda
+            - MYSQL_USER=camunda
+            - MYSQL_PASSWORD=camunda
+            - MYSQL_DATABASE=process-engine
+        volumes:
+            - camunda-db-volume:/var/lib/mysql 
+
+volumes:
+  camunda-db-volume:
